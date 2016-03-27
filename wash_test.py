@@ -192,7 +192,31 @@ class TestBestReplacementLot(unittest.TestCase):
         self.assertLotsSame(self.first_gain,
                             wash.best_replacement_lot(self.loss, lots))
 
-    # TODO add tests for buy_lot being set, and is_replacement being set
+    def test_two_similar_lots(self):
+        # There are two lots that have the same values, but were bought
+        # separately.
+        lot1 = create_lot(10, 2012, 1, 1, 120, 2012, 1, 10, 110)
+        lot2 = create_lot(10, 2012, 1, 1, 120, 2012, 1, 10, 110)
+        lots = lots_lib.Lots([lot1, lot2])
+        self.assertLotsSame(lot2, wash.best_replacement_lot(lot1, lots))
+
+    def test_two_lots_from_same_buy_lot(self):
+        # There are two lots that have the same values, and were bought
+        # together.
+        lot1 = create_lot(10, 2012, 1, 1, 120, 2012, 1, 10, 110)
+        lot1.buy_lot = '1'
+        lot2 = create_lot(10, 2012, 1, 1, 120, 2012, 1, 10, 110)
+        lot2.buy_lot = '1'
+        lots = lots_lib.Lots([lot1, lot2])
+        self.assertLotIsNone(wash.best_replacement_lot(lot1, lots))
+
+    def test_already_used_replacement_is_not_used_again(self):
+        lot1 = create_lot(10, 2012, 1, 1, 120, 2012, 1, 10, 110)
+        lot2 = create_lot(10, 2012, 1, 1, 120, 2012, 1, 10, 110)
+        lot2.is_replacement = True
+        lots = lots_lib.Lots([lot1, lot2])
+        self.assertLotIsNone(wash.best_replacement_lot(lot1, lots))
+
 
 if __name__ == '__main__':
     unittest.main()
