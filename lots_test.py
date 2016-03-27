@@ -6,6 +6,9 @@ import lots as lots_lib
 
 class TestLots(unittest.TestCase):
 
+    def assertSameLots(self, a, b):
+        self.assertEqual(a, b, msg='Lots are not equal: \n{}\n{}'.format(a, b))
+
     def test_parse_valid_csv_file(self):
         csv_data = [
             'Num Shares,Symbol,Description,Buy Date,Basis,Sell Date,'
@@ -27,7 +30,7 @@ class TestLots(unittest.TestCase):
             datetime.date(2014, 9, 25), 3000, datetime.date(2014, 11, 5), 1800,
             '', 0, '', '', False))
         expected_lots = lots_lib.Lots(expected_lots_rows)
-        self.assertTrue(lots == expected_lots)
+        self.assertSameLots(lots, expected_lots)
 
     def test_parse_legacy_valid_csv_file(self):
         csv_data = [
@@ -49,7 +52,7 @@ class TestLots(unittest.TestCase):
             datetime.date(2014, 9, 25), 3000, datetime.date(2014, 11, 5), 1800,
             '', 0, '', '', False))
         expected_lots = lots_lib.Lots(expected_lots_rows)
-        self.assertTrue(lots == expected_lots)
+        self.assertSameLots(lots, expected_lots)
 
     def test_parse_invalid_headers(self):
         csv_data = [
