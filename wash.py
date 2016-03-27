@@ -16,16 +16,22 @@ def best_replacement_lot(loss_lot, lots):
         A Lot object, the best replacement lot.
     """
 
-def earliest_unprocessed_loss_lot(lots):
-    """Finds the earliest loss lot that has not already been processed.
+def earliest_loss_lot(lots):
+    """Finds the first loss sale that has not already been processed.
 
     Args:
         lots: A Lots object, the full set of lots to search through.
     Returns:
         A Lot, or None.
     """
-    #lots.lots().sort(cmp=lots_lib.Lots.cmp_by_buy_date)
-    #for lot in lots.lots():
+    lots.sort(cmp=lots_lib.Lot.cmp_by_sell_date)
+    for lot in lots:
+        if not lot.is_loss():
+            continue
+        if lot.loss_processed:
+            continue
+        return lot
+    return None
 
 def wash_one_lot(loss_lot, lots):
     """Performs a single wash.
@@ -53,7 +59,7 @@ def wash_all_lots(lots):
         lots: A Lots object.
     """
     while True:
-        loss_lot = earliest_unprocessed_loss_lot(lots)
+        loss_lot = earliest_loss_lot(lots)
         if not loss_lot:
             break
         wash_one_lot(loss_lot, lots)

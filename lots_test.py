@@ -4,8 +4,8 @@ import StringIO
 
 import lots as lots_lib
 
-
 class TestLots(unittest.TestCase):
+
     def test_parse_valid_csv_file(self):
         csv_data = [
             'Num Shares,Symbol,Description,Buy Date,Basis,Sell Date,'

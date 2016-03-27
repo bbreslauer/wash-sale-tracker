@@ -219,6 +219,9 @@ class Lots(object):
         """
         self._lots.append(lot)
 
+    def sort(self, **kwargs):
+        self._lots.sort(**kwargs)
+
     def __eq__(self, other):
         retval = True
         for this, that in zip(self._lots, other._lots):
@@ -231,6 +234,9 @@ class Lots(object):
             return self._terminaltables_str()
         else:
             return self._simple_str()
+
+    def __iter__(self):
+        return iter(self._lots)
 
     def do_print(self, matched_lots=[]):
         global _HAS_TERMINALTABLES
@@ -288,14 +294,17 @@ class Lots(object):
         Returns:
             A Lots object
         """
+
         def convert_to_int(value):
             if value:
                 return int(value)
             return 0
+
         def convert_to_date(value):
             if value:
                 return datetime.datetime.strptime(value, '%m/%d/%Y').date()
             return None
+
         def convert_to_bool(value):
             if value:
                 return value.lower() == 'true'
@@ -323,14 +332,17 @@ class Lots(object):
         Args:
             output_file: A file-like object to write to.
         """
+
         def convert_from_int(value):
             if value:
                 return str(value)
             return ''
+
         def convert_from_date(value):
             if value:
                 return value.strftime('%m/%d/%Y')
             return ''
+
         def convert_from_bool(value):
             if value:
                 return 'True'
