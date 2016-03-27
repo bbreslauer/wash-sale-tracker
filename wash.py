@@ -2,8 +2,9 @@ import argparse
 import copy
 import datetime
 import lots as lots_lib
+import logger as logger_lib
 
-def _split_lot(num_shares, lot, lots):
+def _split_lot(num_shares, lot, lots, logger, message):
     """Splits lot and adds the new lot to lots.
 
     Args:
@@ -11,6 +12,8 @@ def _split_lot(num_shares, lot, lots):
             The split out lot will contain lot.num_shares - num_shares.
         lot: A Lot object to split.
         lots: A Lots object to add the new lot to.
+        logger: A logger_lib.Logger.
+        message: A string to use for the logger.
     """
     existing_lot_portion = float(num_shares) / float(lot.num_shares)
     new_lot_portion = float(lot.num_shares - num_shares) / float(lot.num_shares)
@@ -26,6 +29,8 @@ def _split_lot(num_shares, lot, lots):
     lot.basis *= existing_lot_portion
     lot.proceeds *= existing_lot_portion
     lot.adjustment *= existing_lot_portion
+
+    logger.print_lots(message, lots, [lot, new_lot])
 
 def best_replacement_lot(loss_lot, lots):
     """Finds the best replacement lot for a loss lot.
@@ -135,7 +140,7 @@ def earliest_loss_lot(lots):
         return lot
     return None
 
-def wash_one_lot(loss_lot, lots):
+def wash_one_lot(loss_lot, lots, logger):
     """Performs a single wash.
 
     Given a single loss lot, finds replacement lot(s) and adjusts their basis
@@ -158,18 +163,24 @@ def wash_one_lot(loss_lot, lots):
     Args:
         loss_lot: A Lot object, which is a loss that should be washed.
         lots: A Lots object, the full set of lots.
+        logger: A logger_lib.Logger.
     """
     replacement_lot = best_replacement_lot(loss_lot, lots)
     if not replacement_lot:
         loss_lot.loss_processed = True
         return
 
+    logger.print_lots('Found replacement lot', lots,
+                      [loss_lot, replacement_lot])
+
     # There is a replacement lot. If it is not for the same number of shares as
     # the loss lot, split the larger one.
     if loss_lot.num_shares > replacement_lot.num_shares:
-        _split_lot(replacement_lot.num_shares, loss_lot, lots)
+        _split_lot(replacement_lot.num_shares, loss_lot, lots, logger,
+                   'Split loss in two')
     elif replacement_lot.num_shares > loss_lot.num_shares:
-        _split_lot(loss_lot.num_shares, replacement_lot, lots)
+        _split_lot(loss_lot.num_shares, replacement_lot, lots, logger,
+                   'Split replacement in two')
 
     # Now the loss_lot and replacement_lot have the same number of shares.
     loss_lot.loss_processed = True
@@ -179,17 +190,22 @@ def wash_one_lot(loss_lot, lots):
     replacement_lot.basis += loss_lot.adjustment
     replacement_lot.buy_date -= loss_lot.sell_date - loss_lot.buy_date
 
-def wash_all_lots(lots):
+    logger.print_lots('Adjusted basis and buy date', lots, [loss_lot,
+                                                            replacement_lot])
+
+def wash_all_lots(lots, logger):
     """Performs wash sales of all the lots.
 
     Args:
         lots: A Lots object.
+        logger: A logger_lib.Logger.
     """
     while True:
         loss_lot = earliest_loss_lot(lots)
         if not loss_lot:
             break
-        wash_one_lot(loss_lot, lots)
+        logger.print_lots('Found loss', lots, [loss_lot])
+        wash_one_lot(loss_lot, lots, logger)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -197,20 +213,18 @@ def main():
     parser.add_argument('-w', '--do_wash', metavar='in_file')
     parsed = parser.parse_args()
 
-    # TODO sort before printing
+    logger = logger_lib.TermLogger()
     if parsed.do_wash:
         lots = lots_lib.Lots([])
         with open(parsed.do_wash) as f:
             lots = lots_lib.Lots.create_from_csv_data(f)
-        print 'Start lots:'
-        lots.do_print()
-        wash_all_lots(lots)
+        logger.print_lots('Start lots', lots)
+        wash_all_lots(lots, logger)
         if parsed.out_file:
             with open(parsed.out_file, 'w') as f:
                 lots.write_csv_data(f)
         else:
-            print 'Final lots:'
-            lots.do_print()
+            logger.print_lots('Final lots', lots)
 
 
 if __name__ == "__main__":

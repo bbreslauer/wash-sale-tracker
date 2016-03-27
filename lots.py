@@ -9,6 +9,13 @@ try:
 except ImportError:
     pass
 
+_HAS_COLORCLASS = False
+try:
+    import colorclass
+    _HAS_COLORCLASS = True
+except ImportError:
+    pass
+
 
 class BadHeadersError(Exception):
     """Raised if the headers that are parsed are not in the correct format."""
@@ -278,6 +285,10 @@ class Lots(object):
             if matched_lots:
                 if id(lot) in map(id, matched_lots):
                     str_data.append('*')
+                    if _HAS_COLORCLASS:
+                        str_data = map(
+                            lambda x: colorclass.Color('{red}' + x + '{/red}'),
+                            str_data)
                 else:
                     str_data.append('')
             lots_data.append(str_data)
