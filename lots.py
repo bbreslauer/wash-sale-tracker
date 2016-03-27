@@ -1,4 +1,3 @@
-import copy
 import csv
 import datetime
 
@@ -45,7 +44,8 @@ class Lot(object):
                 which lots are related when a lot is split.
             buy_lot: A string, an arbitrary value that indicates that can be
                 used to indicate that multiple entries are part of the same
-                logical lot.
+                logical lot. An empty string indicates that this is a unique
+                lot.
             is_replacement: A boolean, if true then this lot has been used as
                 replacement shares. Useful because a lot can only be used as
                 replacement shares once.
@@ -65,6 +65,8 @@ class Lot(object):
 
         # This is used to determine whether the loss has been processed for a
         # potential wash sale.
+        # TODO: Make this a field that is in the CSV, so that running the
+        # script is idempotent.
         self.loss_processed = False
 
     def is_loss(self):
@@ -145,6 +147,11 @@ class Lot(object):
             return 1
         return 0
 
+    @staticmethod
+    def cmp_by_num_shares(a, b):
+        """Sorts two lots based solely on their number of shares."""
+        return a.num_shares - b.num_shares
+
 
 class Lots(object):
     """Contains a set of lots."""
@@ -202,9 +209,16 @@ class Lots(object):
     def __init__(self, lots):
         """Creates a new set of lots.
 
+        Populates the buy_lot field in each lot if it is not set.
+
         Args:
             lots: A list of Lot objects.
         """
+        i = 1
+        for lot in lots:
+            if not lot.buy_lot:
+                lot.buy_lot = '_{}'.format(i)
+                i += 1
         self._lots = lots
 
     def lots(self):
@@ -218,6 +232,10 @@ class Lots(object):
             lot: The Lot to add.
         """
         self._lots.append(lot)
+
+    def size(self):
+        """Returns the number of lots."""
+        return len(self._lots)
 
     def sort(self, **kwargs):
         self._lots.sort(**kwargs)
@@ -238,21 +256,18 @@ class Lots(object):
     def __iter__(self):
         return iter(self._lots)
 
-    def do_print(self, matched_lots=[]):
+    def do_print(self, matched_lots=None):
         global _HAS_TERMINALTABLES
         if _HAS_TERMINALTABLES:
             print self._terminaltables_str(matched_lots)
         else:
             print self._simple_str(matched_lots)
 
-    def _terminaltables_str(self, matched_lots=[]):
-        lots = copy.copy(self._lots)
-        lots.sort(Lot.cmp_by_buy_date)
-
+    def _terminaltables_str(self, matched_lots=None):
         lots_data = [[self.SHORT_HEADERS[field] for field in Lot.FIELD_NAMES]]
         if matched_lots:
             lots_data[0].append('Matched')
-        for lot in lots:
+        for lot in self._lots:
             str_data = lot.str_data()
             if matched_lots:
                 if id(lot) in map(id, matched_lots):
@@ -262,16 +277,13 @@ class Lots(object):
             lots_data.append(str_data)
         return terminaltables.AsciiTable(lots_data).table
 
-    def _simple_str(self, matched_lots=[]):
-        lots = copy.copy(self._lots)
-        lots.sort(Lot.cmp_by_buy_date)
-
+    def _simple_str(self, matched_lots=None):
         lot_strings = []
         lot_strings.append(' '.join([self.SHORT_HEADERS[field]
                                      for field in Lot.FIELD_NAMES]))
         if matched_lots:
             lot_strings.append('Matched')
-        for lot in lots:
+        for lot in self._lots:
             str_data = str(lot)
             if matched_lots and id(lot) in map(id, matched_lots):
                 str_data = '* ' + str_data

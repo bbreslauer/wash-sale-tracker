@@ -186,6 +186,34 @@ class TestLots(unittest.TestCase):
         lots.sort(cmp=lots_lib.Lot.cmp_by_sell_date)
         self.assertTrue(lots == expected)
 
+    def test_compare_by_num_shares(self):
+        lots = []
+        lots.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2), 0,
+            datetime.date(2014, 11, 5), 0, '', 0, 'form2', '', False))
+        lots.append(lots_lib.Lot(5, '', '', datetime.date(2014, 9, 1), 0,
+            datetime.date(2014, 10, 5), 0, '', 0, 'form1', '', False))
+        lots.append(lots_lib.Lot(3, '', '', datetime.date(2014, 9, 2), 0,
+            datetime.date(2014, 11, 5), 0, '', 0, 'form1', '', False))
+        lots.append(lots_lib.Lot(2, '', '', datetime.date(2014, 9, 2), 0,
+            datetime.date(2014, 11, 5), 0, '', 0, 'form1', '', False))
+        lots.append(lots_lib.Lot(7, '', '', datetime.date(2014, 9, 3), 0,
+            datetime.date(2014, 10, 5), 0, '', 0, 'form1', '', False))
+
+        expected = []
+        expected.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2), 0,
+            datetime.date(2014, 11, 5), 0, '', 0, 'form2', '', False))
+        expected.append(lots_lib.Lot(2, '', '', datetime.date(2014, 9, 2), 0,
+            datetime.date(2014, 11, 5), 0, '', 0, 'form1', '', False))
+        expected.append(lots_lib.Lot(3, '', '', datetime.date(2014, 9, 2), 0,
+            datetime.date(2014, 11, 5), 0, '', 0, 'form1', '', False))
+        expected.append(lots_lib.Lot(5, '', '', datetime.date(2014, 9, 1), 0,
+            datetime.date(2014, 10, 5), 0, '', 0, 'form1', '', False))
+        expected.append(lots_lib.Lot(7, '', '', datetime.date(2014, 9, 3), 0,
+            datetime.date(2014, 10, 5), 0, '', 0, 'form1', '', False))
+
+        lots.sort(cmp=lots_lib.Lot.cmp_by_num_shares)
+        self.assertTrue(lots == expected)
+
 
 if __name__ == '__main__':
     unittest.main()
