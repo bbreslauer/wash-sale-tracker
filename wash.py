@@ -7,31 +7,45 @@ def _split_lot(num_shares, lot, lots):
     """Splits lot and adds the new lot to lots.
 
     Args:
-        num_shares: An integer, the number of shares that the lot should be
-            split into.
+        num_shares: An integer, the number of shares that lot should contain.
+            The split out lot will contain lot.num_shares - num_shares.
         lot: A Lot object to split.
         lots: A Lots object to add the new lot to.
     """
+    existing_lot_portion = float(num_shares) / float(lot.num_shares)
+    new_lot_portion = float(lot.num_shares - num_shares) / float(lot.num_shares)
+
     new_lot = copy.deepcopy(lot)
     new_lot.num_shares -= num_shares
-    lot.num_shares = num_shares
+    new_lot.basis *= new_lot_portion
+    new_lot.proceeds *= new_lot_portion
+    new_lot.adjustment *= new_lot_portion
     lots.add(new_lot)
+
+    lot.num_shares = num_shares
+    lot.basis *= existing_lot_portion
+    lot.proceeds *= existing_lot_portion
+    lot.adjustment *= existing_lot_portion
 
 def best_replacement_lot(loss_lot, lots):
     """Finds the best replacement lot for a loss lot.
 
-    If a replacement lot has fewer shares than the loss lot, then the loss lot
-    will be split in two. The existing Lot will be adjusted to have the same
-    number of shares as the replacement lot, and the other split will be added
-    to lots and can be processed later.
+    The search starts from the earliest buy, and continues forward in time. A
+    replacement lot must be within 30 days on either side of the loss sale, not
+    be part of the same lot, and not already have been used as a replacement.
+    If there is only one lot bought on the first such day, then that is
+    returned. It may be for fewer, the same, or more shares than the loss lot.
+    If there are multiple lots bought on the first such day, then the one sold
+    earliest is chosen. If there are multiple lots bought and sold on the same
+    day, then a lot for the same number of shares is chosen, or if none exists,
+    for a larger number of shares.
 
     Args:
         loss_lot: A Lot object, which is a loss that should be washed.
         lots: A Lots object, the full set of lots.
     Returns:
-        A Lot object, the best replacement lot, or None if there is none. If
-        not None, then this lot will be for <= the number of shares of the
-        loss_lot.
+        A Lot object, the best replacement lot, or None if there is none. May
+        have more or fewer shares than the loss_lot.
     """
     # Replacement lots must be chosen oldest first.
     lots.sort(cmp=lots_lib.Lot.cmp_by_buy_date)
@@ -50,6 +64,8 @@ def best_replacement_lot(loss_lot, lots):
             # only be used as a replacement once, per 26 CFR 1.1091-1(e) (the
             # "one bite of the apple" rule).
             continue
+        # TODO don't select lots that were sold before the loss, and provide
+        # justification
         possible_replacement_lots.append(lot)
 
     if not possible_replacement_lots:
@@ -84,20 +100,18 @@ def best_replacement_lot(loss_lot, lots):
 
     if len(first_day_lots) == 1:
         lot = first_day_lots[0]
-        if lot.num_shares > loss_lot.num_shares:
-            _split_lot(loss_lot.num_shares, lot, lots)
         return lot
 
     # If we have gotten here, then we know that there are at least 2 lots to
     # choose from. Choose the one with the same number of shares as the loss,
-    # or the smallest number of shares greater than the loss.
+    # or if none exists then a lot with a greater number of shares than the
+    # loss.
     first_day_lots.sort(lots_lib.Lot.cmp_by_num_shares)
     for lot in first_day_lots:
         if lot.num_shares < loss_lot.num_shares:
             continue
-        if lot.num_shares > loss_lot.num_shares:
-            _split_lot(loss_lot.num_shares, lot, lots)
-        return lot
+        if lot.num_shares >= loss_lot.num_shares:
+            return lot
 
     # If we have gotten here, then there is no replacement lot that has at
     # least as many shares as the loss. Return the lot with the largest number
@@ -125,11 +139,17 @@ def wash_one_lot(loss_lot, lots):
     """Performs a single wash.
 
     Given a single loss lot, finds replacement lot(s) and adjusts their basis
-    and buy date in place. If the loss lot needs to be split into multiple
-    parts (because the replacement lots are for fewer shares) then it will be
-    split into two parts and the wash will be performed for only the first
-    part. The second part can be taken care of by another call to this method
-    with it passed in as the loss_lot.
+    and buy date in place.
+
+    If the loss lot needs to be split into multiple parts (because the
+    replacement lots are for fewer shares) then it will be split into two parts
+    and the wash will be performed for only the first part. The second part can
+    be taken care of by another call to this method with it passed in as the
+    loss_lot.
+
+    If the replacement lot needs to be split into multiple parts (because the
+    replacement lot has more shares than the loss lot) then it will be split
+    and the second part of the lot will be added to lots.
 
     A replacement lot is one that is purchased within 30 days of the loss_lot's
     sale, not already used as a replacement, and not part of the same lot as
@@ -139,6 +159,25 @@ def wash_one_lot(loss_lot, lots):
         loss_lot: A Lot object, which is a loss that should be washed.
         lots: A Lots object, the full set of lots.
     """
+    replacement_lot = best_replacement_lot(loss_lot, lots)
+    if not replacement_lot:
+        loss_lot.loss_processed = True
+        return
+
+    # There is a replacement lot. If it is not for the same number of shares as
+    # the loss lot, split the larger one.
+    if loss_lot.num_shares > replacement_lot.num_shares:
+        _split_lot(replacement_lot.num_shares, loss_lot, lots)
+    elif replacement_lot.num_shares > loss_lot.num_shares:
+        _split_lot(loss_lot.num_shares, replacement_lot, lots)
+
+    # Now the loss_lot and replacement_lot have the same number of shares.
+    loss_lot.loss_processed = True
+    loss_lot.adjustment_code = 'W'
+    loss_lot.adjustment = loss_lot.basis - loss_lot.proceeds
+    replacement_lot.is_replacement = True
+    replacement_lot.basis += loss_lot.adjustment
+    replacement_lot.buy_date -= loss_lot.sell_date - loss_lot.buy_date
 
 def wash_all_lots(lots):
     """Performs wash sales of all the lots.

@@ -83,7 +83,7 @@ class TestLots(unittest.TestCase):
             'Is Replacement',
             '10,ABC,A,09/15/2014,2000,10/05/2014,1800,W,200,form1,lot1,True',
             '10,ABC,A,09/15/2014,2000,10/05/2014,1800,W,200,form2,lot2,False',
-            '20,ABC,A,09/25/2014,3000,11/05/2014,1800,,,,,False'
+            '20,ABC,A,09/25/2014,3000,11/05/2014,1800,,,,_1,False'
         ]
 
         actual_output.seek(0)

@@ -241,10 +241,12 @@ class Lots(object):
         self._lots.sort(**kwargs)
 
     def __eq__(self, other):
-        retval = True
-        for this, that in zip(self._lots, other._lots):
-            retval = retval and this == that
-        return retval
+        if len(self._lots) != len(other._lots):
+            return False
+        for lot in self._lots:
+            if lot not in other._lots:
+                return False
+        return True
 
     def __str__(self):
         global _HAS_TERMINALTABLES
