@@ -1,3 +1,4 @@
+import copy
 import csv
 import datetime
 
@@ -266,10 +267,13 @@ class Lots(object):
             print self._simple_str(matched_lots)
 
     def _terminaltables_str(self, matched_lots=None):
+        # Make a shallow copy so that we can sort but id(lot) still works.
+        lots = copy.copy(self._lots)
+        lots.sort(cmp=Lot.cmp_by_buy_date)
         lots_data = [[self.SHORT_HEADERS[field] for field in Lot.FIELD_NAMES]]
         if matched_lots:
             lots_data[0].append('Matched')
-        for lot in self._lots:
+        for lot in lots:
             str_data = lot.str_data()
             if matched_lots:
                 if id(lot) in map(id, matched_lots):
@@ -280,12 +284,15 @@ class Lots(object):
         return terminaltables.AsciiTable(lots_data).table
 
     def _simple_str(self, matched_lots=None):
+        # Make a shallow copy so that we can sort but id(lot) still works.
+        lots = copy.copy(self._lots)
+        lots.sort(cmp=Lot.cmp_by_buy_date)
         lot_strings = []
         lot_strings.append(' '.join([self.SHORT_HEADERS[field]
                                      for field in Lot.FIELD_NAMES]))
         if matched_lots:
             lot_strings.append('Matched')
-        for lot in self._lots:
+        for lot in lots:
             str_data = str(lot)
             if matched_lots and id(lot) in map(id, matched_lots):
                 str_data = '* ' + str_data
