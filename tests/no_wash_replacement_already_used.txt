@@ -1,0 +1,1 @@
+There is no wash sale, because the replacement is marked as already having been used (perhaps for a wash sale outside of the input).

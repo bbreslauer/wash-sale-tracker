@@ -20,15 +20,15 @@ def _split_lot(num_shares, lot, lots, logger, type_of_lot):
 
     new_lot = copy.deepcopy(lot)
     new_lot.num_shares -= num_shares
-    new_lot.basis *= new_lot_portion
-    new_lot.proceeds *= new_lot_portion
-    new_lot.adjustment *= new_lot_portion
+    new_lot.basis = int(round(new_lot.basis * new_lot_portion))
+    new_lot.proceeds = int(round(new_lot.proceeds * new_lot_portion))
+    new_lot.adjustment = int(round(new_lot.adjustment * new_lot_portion))
     lots.add(new_lot)
 
     lot.num_shares = num_shares
-    lot.basis *= existing_lot_portion
-    lot.proceeds *= existing_lot_portion
-    lot.adjustment *= existing_lot_portion
+    lot.basis = int(round(lot.basis * existing_lot_portion))
+    lot.proceeds = int(round(lot.proceeds * existing_lot_portion))
+    lot.adjustment = int(round(lot.adjustment * existing_lot_portion))
 
     loss_lots = [lot] if type_of_lot == 'loss' else []
     split_off_loss_lots = [new_lot] if type_of_lot == 'loss' else []
