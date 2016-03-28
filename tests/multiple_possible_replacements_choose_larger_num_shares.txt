@@ -1,0 +1,1 @@
+There are multiple possible replacement lots, that were all bought and sold on the same day. Since there are no replacement lots with the same number of shares as the loss, the one with a greater number of shares is used.

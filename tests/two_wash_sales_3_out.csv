@@ -1,0 +1,6 @@
+Cnt,Sym,Desc,BuyDate,Basis,SellDate,Proceeds,AdjCode,Adj,FormPosition,BuyLot,IsReplacement
+10,ABC,A,05/20/2012,200,06/01/2012,100,W,100,Line 1,_1,
+10,ABC,B,05/29/2012,267,08/01/2012,183,W,84,Line 2,_2,True
+2,ABC,B,06/10/2012,33,08/01/2012,37,,,Line 2,_2,
+10,ABC,C,06/20/2012,584,10/01/2012,1000,,,Line 3,_3,True
+10,ABC,D,08/24/2012,600,10/01/2012,1100,,,Line 4,_4,

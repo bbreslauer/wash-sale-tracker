@@ -1,0 +1,1 @@
+The first lot is a loss, and washes against part of the second lot. The part of the second lot that was used for the wash then becomes a loss (but the extra 2 shares are still a gain). The 10 shares in the second lot are then washed against the third lot. The fourth lot is untouched, because there are no more losses.
