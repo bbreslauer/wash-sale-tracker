@@ -248,6 +248,17 @@ class Lots(object):
     def sort(self, **kwargs):
         self._lots.sort(**kwargs)
 
+    def contents_equal(self, other):
+        """Returns True if the individual lots are the same.
+
+        This is different than __eq__ because the individual Lot objects do not
+        need to have the same id(), just be equivalent.
+        """
+        for this, that in zip(self._lots, other._lots):
+            if this != that:
+                return False
+        return True
+
     def __eq__(self, other):
         if len(self._lots) != len(other._lots):
             return False
