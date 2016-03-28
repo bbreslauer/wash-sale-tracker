@@ -266,47 +266,131 @@ class Lots(object):
     def __iter__(self):
         return iter(self._lots)
 
-    def do_print(self, matched_lots=None):
+    def do_print(self,
+                 loss_lots=None,
+                 split_off_loss_lots=None,
+                 replacement_lots=None,
+                 split_off_replacement_lots=None):
         global _HAS_TERMINALTABLES
         if _HAS_TERMINALTABLES:
-            print self._terminaltables_str(matched_lots)
+            print self._terminaltables_str(loss_lots, split_off_loss_lots,
+                                           replacement_lots,
+                                           split_off_replacement_lots)
         else:
-            print self._simple_str(matched_lots)
+            print self._simple_str(loss_lots, split_off_loss_lots,
+                                   replacement_lots,
+                                   split_off_replacement_lots)
 
-    def _terminaltables_str(self, matched_lots=None):
+    @staticmethod
+    def _classify_lot(lot,
+                      loss_lots=None,
+                      split_off_loss_lots=None,
+                      replacement_lots=None,
+                      split_off_replacement_lots=None):
+        """Classifies the provided lot based on the lists of lots provided.
+
+        Args:
+            lot: A Lot to classify.
+            loss_lots: A list of Lot objects.
+            split_off_loss_lots: A list of Lot objects.
+            replacement_lots: A list of Lot objects.
+            split_off_replacement_lots: A list of Lot objects.
+
+        Returns:
+            (characters, color) or ()
+            characters: A string containing classification characters, like * .
+            color: A string containing the color to highlight the lot as.
+        """
+        characters = ''
+        color = ''
+        if loss_lots and id(lot) in map(id, loss_lots):
+            characters += '*'
+            color = 'red'
+        elif split_off_loss_lots and id(lot) in map(id, split_off_loss_lots):
+            characters += 'x'
+            color = 'magenta'
+        elif replacement_lots and id(lot) in map(id, replacement_lots):
+            characters += 'o'
+            color = 'green'
+        elif split_off_replacement_lots and id(lot) in map(
+                id, split_off_replacement_lots):
+            characters += '+'
+            color = 'blue'
+
+        if characters or color:
+            return (characters, color)
+        return ()
+
+    @staticmethod
+    def _color_string(color, s):
+        """Colors a string, if colorclass is imported.
+
+        Args:
+            color: A string representing the color.
+            s: A string to color.
+        Returns:
+            A possibly-colorized string.
+        """
+        if _HAS_COLORCLASS:
+            return colorclass.Color('{' + color + '}' + s + '{/' + color + '}')
+        return s
+
+    def _terminaltables_str(self,
+                            loss_lots=None,
+                            split_off_loss_lots=None,
+                            replacement_lots=None,
+                            split_off_replacement_lots=None):
+        """Generates an ASCII table of this Lots object.
+
+        Any lots in the optional lists are highlighted.
+
+        Args:
+            loss_lots: A list of Lot objects.
+            split_off_loss_lots: A list of Lot objects.
+            replacement_lots: A list of Lot objects.
+            split_off_replacement_lots: A list of Lot objects.
+        Returns:
+            A string representing this Lots object.
+        """
         # Make a shallow copy so that we can sort but id(lot) still works.
         lots = copy.copy(self._lots)
         lots.sort(cmp=Lot.cmp_by_buy_date)
         lots_data = [[self.SHORT_HEADERS[field] for field in Lot.FIELD_NAMES]]
-        if matched_lots:
-            lots_data[0].append('Matched')
+        lots_data[0].append('Matched')
         for lot in lots:
             str_data = lot.str_data()
-            if matched_lots:
-                if id(lot) in map(id, matched_lots):
-                    str_data.append('*')
-                    if _HAS_COLORCLASS:
-                        str_data = map(
-                            lambda x: colorclass.Color('{red}' + x + '{/red}'),
-                            str_data)
-                else:
-                    str_data.append('')
+            classification = Lots._classify_lot(
+                lot, loss_lots, split_off_loss_lots, replacement_lots,
+                split_off_replacement_lots)
+            if classification:
+                str_data.append(classification[0])
+                color = classification[1]
+                str_data = map(lambda x: Lots._color_string(color, x), str_data)
+            else:
+                str_data.append('')
             lots_data.append(str_data)
         return terminaltables.AsciiTable(lots_data).table
 
-    def _simple_str(self, matched_lots=None):
+    def _simple_str(self,
+                    loss_lots=None,
+                    split_off_loss_lots=None,
+                    replacement_lots=None,
+                    split_off_replacement_lots=None):
         # Make a shallow copy so that we can sort but id(lot) still works.
         lots = copy.copy(self._lots)
         lots.sort(cmp=Lot.cmp_by_buy_date)
         lot_strings = []
         lot_strings.append(' '.join([self.SHORT_HEADERS[field]
                                      for field in Lot.FIELD_NAMES]))
-        if matched_lots:
-            lot_strings.append('Matched')
         for lot in lots:
+            classification = Lots._classify_lot(
+                lot, loss_lots, split_off_loss_lots, replacement_lots,
+                split_off_replacement_lots)
             str_data = str(lot)
-            if matched_lots and id(lot) in map(id, matched_lots):
-                str_data = '* ' + str_data
+            if classification:
+                str_data = classification[0] + ' ' + str_data
+                color = classification[1]
+                str_data = Lots._color_string(color, str_data)
             lot_strings.append(str_data)
         return '\n'.join(lot_strings)
 

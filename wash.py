@@ -4,7 +4,7 @@ import datetime
 import lots as lots_lib
 import logger as logger_lib
 
-def _split_lot(num_shares, lot, lots, logger, message):
+def _split_lot(num_shares, lot, lots, logger, type_of_lot):
     """Splits lot and adds the new lot to lots.
 
     Args:
@@ -13,7 +13,7 @@ def _split_lot(num_shares, lot, lots, logger, message):
         lot: A Lot object to split.
         lots: A Lots object to add the new lot to.
         logger: A logger_lib.Logger.
-        message: A string to use for the logger.
+        type_of_lot: Either 'loss' or 'replacement'
     """
     existing_lot_portion = float(num_shares) / float(lot.num_shares)
     new_lot_portion = float(lot.num_shares - num_shares) / float(lot.num_shares)
@@ -30,7 +30,17 @@ def _split_lot(num_shares, lot, lots, logger, message):
     lot.proceeds *= existing_lot_portion
     lot.adjustment *= existing_lot_portion
 
-    logger.print_lots(message, lots, [lot, new_lot])
+    loss_lots = [lot] if type_of_lot == 'loss' else []
+    split_off_loss_lots = [new_lot] if type_of_lot == 'loss' else []
+    replacement_lots = [lot] if type_of_lot == 'replacement' else []
+    split_off_replacement_lots = [new_lot
+                                  ] if type_of_lot == 'replacement' else []
+    logger.print_lots('Split {} in two'.format(type_of_lot),
+                      lots,
+                      loss_lots=loss_lots,
+                      split_off_loss_lots=split_off_loss_lots,
+                      replacement_lots=replacement_lots,
+                      split_off_replacement_lots=split_off_replacement_lots)
 
 def best_replacement_lot(loss_lot, lots):
     """Finds the best replacement lot for a loss lot.
@@ -170,17 +180,18 @@ def wash_one_lot(loss_lot, lots, logger):
         loss_lot.loss_processed = True
         return
 
-    logger.print_lots('Found replacement lot', lots,
-                      [loss_lot, replacement_lot])
+    logger.print_lots('Found replacement lot',
+                      lots,
+                      loss_lots=[loss_lot],
+                      replacement_lots=[replacement_lot])
 
     # There is a replacement lot. If it is not for the same number of shares as
     # the loss lot, split the larger one.
     if loss_lot.num_shares > replacement_lot.num_shares:
-        _split_lot(replacement_lot.num_shares, loss_lot, lots, logger,
-                   'Split loss in two')
+        _split_lot(replacement_lot.num_shares, loss_lot, lots, logger, 'loss')
     elif replacement_lot.num_shares > loss_lot.num_shares:
         _split_lot(loss_lot.num_shares, replacement_lot, lots, logger,
-                   'Split replacement in two')
+                   'replacement')
 
     # Now the loss_lot and replacement_lot have the same number of shares.
     loss_lot.loss_processed = True
@@ -190,8 +201,10 @@ def wash_one_lot(loss_lot, lots, logger):
     replacement_lot.basis += loss_lot.adjustment
     replacement_lot.buy_date -= loss_lot.sell_date - loss_lot.buy_date
 
-    logger.print_lots('Adjusted basis and buy date', lots, [loss_lot,
-                                                            replacement_lot])
+    logger.print_lots('Adjusted basis and buy date',
+                      lots,
+                      loss_lots=[loss_lot],
+                      replacement_lots=[replacement_lot])
 
 def wash_all_lots(lots, logger):
     """Performs wash sales of all the lots.
@@ -204,7 +217,7 @@ def wash_all_lots(lots, logger):
         loss_lot = earliest_loss_lot(lots)
         if not loss_lot:
             break
-        logger.print_lots('Found loss', lots, [loss_lot])
+        logger.print_lots('Found loss', lots, loss_lots=[loss_lot])
         wash_one_lot(loss_lot, lots, logger)
 
 def main():
