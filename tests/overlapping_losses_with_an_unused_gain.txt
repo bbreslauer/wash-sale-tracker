@@ -1,0 +1,1 @@
+There are multiple lots with losses, which overlap in time. They are washed against each other. There is also a gain which is not used as a replacement, since it was bought after the other lot around that time, and replacement lots are chosen chronologically.

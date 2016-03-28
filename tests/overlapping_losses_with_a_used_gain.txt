@@ -1,0 +1,1 @@
+There are multiple lots with losses, which overlap in time. In addition there is a gain. The first loss is washed against the gain, because it was bought first. Then the second loss is washed against the third loss.

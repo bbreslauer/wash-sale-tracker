@@ -1,0 +1,1 @@
+There are multiple lots with losses, which overlap in time. They are washed against each other.
