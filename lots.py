@@ -71,10 +71,20 @@ class Lot(object):
         self.buy_lot = buy_lot
         self.is_replacement = is_replacement
 
+        # We keep this so that we can do a stable sort even if the buy_date is
+        # adjusted.
+        self.original_buy_date = copy.deepcopy(buy_date)
+
+        # If this is a replacement lot, then this is the buy_lot that it
+        # replaced, or if there is a chain of them, the buy_lot of all the
+        # replacements.
+        self.replacement_for = []
+
         # This is used to determine whether the loss has been processed for a
         # potential wash sale.
         # TODO: Make this a field that is in the CSV, so that running the
-        # script is idempotent.
+        # script is idempotent. (Some other things might need to be saved as
+        # well).
         self.loss_processed = False
 
     def is_loss(self):
@@ -129,6 +139,23 @@ class Lot(object):
         """Sorts two lots based on their buy dates."""
         if a.buy_date != b.buy_date:
             return (a.buy_date - b.buy_date).days
+        if a.sell_date != b.sell_date:
+            if a.sell_date is None:
+                return 1
+            if b.sell_date is None:
+                return -1
+            return (a.sell_date - b.sell_date).days
+        if a.form_position != b.form_position:
+            if a.form_position < b.form_position:
+                return -1
+            return 1
+        return 0
+
+    @staticmethod
+    def cmp_by_original_buy_date(a, b):
+        """Sorts two lots based on their original buy dates."""
+        if a.original_buy_date != b.original_buy_date:
+            return (a.original_buy_date - b.original_buy_date).days
         if a.sell_date != b.sell_date:
             if a.sell_date is None:
                 return 1
@@ -371,7 +398,7 @@ class Lots(object):
         """
         # Make a shallow copy so that we can sort but id(lot) still works.
         lots = copy.copy(self._lots)
-        lots.sort(cmp=Lot.cmp_by_buy_date)
+        lots.sort(cmp=Lot.cmp_by_original_buy_date)
         lots_data = [[self.SHORT_HEADERS[field] for field in Lot.FIELD_NAMES]]
         lots_data[0].append('Matched')
         for lot in lots:
@@ -395,7 +422,7 @@ class Lots(object):
                     split_off_replacement_lots=None):
         # Make a shallow copy so that we can sort but id(lot) still works.
         lots = copy.copy(self._lots)
-        lots.sort(cmp=Lot.cmp_by_buy_date)
+        lots.sort(cmp=Lot.cmp_by_original_buy_date)
         lot_strings = []
         lot_strings.append(' '.join([self.SHORT_HEADERS[field]
                                      for field in Lot.FIELD_NAMES]))

@@ -87,6 +87,13 @@ def best_replacement_lot(loss_lot, lots):
             # only be used as a replacement once, per 26 CFR 1.1091-1(e) (the
             # "one bite of the apple" rule).
             continue
+        if lot.buy_lot in loss_lot.replacement_for:
+            # If the loss_lot was already a replacement for the lot, then don't
+            # also replace in the other direction.  This prevents a loop so
+            # that if you have two losses A and B, then B is a replacement for
+            # A, or A is a replacement for B, but they are not both
+            # replacements.
+            continue
         if lot.sell_date and lot.sell_date < loss_lot.sell_date:
             # Don't select lots that were sold before the loss. See the
             # docstring for the reasoning behind this.
@@ -187,6 +194,7 @@ def wash_one_lot(loss_lot, lots, logger=logger_lib.NullLogger()):
     """
     replacement_lot = best_replacement_lot(loss_lot, lots)
     if not replacement_lot:
+        logger.print_lots('No replacement lot', lots, loss_lots=[loss_lot])
         loss_lot.loss_processed = True
         return
 
@@ -208,6 +216,7 @@ def wash_one_lot(loss_lot, lots, logger=logger_lib.NullLogger()):
     loss_lot.adjustment_code = 'W'
     loss_lot.adjustment = loss_lot.basis - loss_lot.proceeds
     replacement_lot.is_replacement = True
+    replacement_lot.replacement_for.append(loss_lot.buy_lot)
     replacement_lot.basis += loss_lot.adjustment
     replacement_lot.buy_date -= loss_lot.sell_date - loss_lot.buy_date
 
