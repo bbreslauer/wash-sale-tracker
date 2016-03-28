@@ -102,6 +102,9 @@ class Lot(object):
                 self.buy_lot == other.buy_lot and
                 self.is_replacement == other.is_replacement)
 
+    def __ne__(self, other):
+        return not self == other
+
     def __str__(self):
         return ' '.join(self.str_data())
 
@@ -266,6 +269,9 @@ class Lots(object):
             if lot not in other._lots:
                 return False
         return True
+
+    def __ne__(self, other):
+        return not self == other
 
     def __str__(self):
         global _HAS_TERMINALTABLES

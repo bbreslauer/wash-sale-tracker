@@ -16,7 +16,7 @@ def run_test(infile, outfile):
     expected = lots_lib.Lots.create_from_csv_data(open(outfile))
     lots.sort(cmp=lots_lib.Lot.cmp_by_buy_date)
     expected.sort(cmp=lots_lib.Lot.cmp_by_buy_date)
-    if lots.contents_equal(expected):
+    if not lots.contents_equal(expected):
         print 'Test failed: {}'.format(infile)
         print 'Got result:'
         lots.do_print()

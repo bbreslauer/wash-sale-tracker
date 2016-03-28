@@ -1,3 +1,4 @@
+import copy
 import datetime
 import unittest
 import StringIO
@@ -216,6 +217,32 @@ class TestLots(unittest.TestCase):
 
         lots.sort(cmp=lots_lib.Lot.cmp_by_num_shares)
         self.assertTrue(lots == expected)
+
+    def test_contents_equal(self):
+        lots = lots_lib.Lots([])
+        lots.add(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2), 0,
+            datetime.date(2014, 11, 5), 0, '', 0, 'form2', '', False))
+        lots.add(lots_lib.Lot(5, '', '', datetime.date(2014, 9, 1), 0,
+            datetime.date(2014, 10, 5), 0, '', 0, 'form1', '', False))
+        lots.add(lots_lib.Lot(3, '', '', datetime.date(2014, 9, 2), 0,
+            datetime.date(2014, 11, 5), 0, '', 0, 'form1', '', False))
+        self.assertTrue(lots.contents_equal(lots))
+
+        other_lots = copy.deepcopy(lots)
+        self.assertTrue(lots.contents_equal(other_lots))
+
+    def test_contents_not_equal(self):
+        lots = lots_lib.Lots([])
+        lots.add(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2), 0,
+            datetime.date(2014, 11, 5), 0, '', 0, 'form2', '', False))
+        lots.add(lots_lib.Lot(5, '', '', datetime.date(2014, 9, 1), 0,
+            datetime.date(2014, 10, 5), 0, '', 0, 'form1', '', False))
+        lots.add(lots_lib.Lot(3, '', '', datetime.date(2014, 9, 2), 0,
+            datetime.date(2014, 11, 5), 0, '', 0, 'form1', '', False))
+
+        other_lots = copy.deepcopy(lots)
+        other_lots.lots()[0].num_shares = 2
+        self.assertFalse(lots.contents_equal(other_lots))
 
 
 if __name__ == '__main__':
