@@ -150,7 +150,7 @@ def earliest_loss_lot(lots):
         return lot
     return None
 
-def wash_one_lot(loss_lot, lots, logger):
+def wash_one_lot(loss_lot, lots, logger=logger_lib.NullLogger()):
     """Performs a single wash.
 
     Given a single loss lot, finds replacement lot(s) and adjusts their basis
@@ -206,7 +206,7 @@ def wash_one_lot(loss_lot, lots, logger):
                       loss_lots=[loss_lot],
                       replacement_lots=[replacement_lot])
 
-def wash_all_lots(lots, logger):
+def wash_all_lots(lots, logger=logger_lib.NullLogger()):
     """Performs wash sales of all the lots.
 
     Args:
