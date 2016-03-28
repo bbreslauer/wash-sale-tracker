@@ -1,0 +1,1 @@
+This is a simple wash sale, where the replacement lot was bought before the loss was sold, and the replacement was a loss.
