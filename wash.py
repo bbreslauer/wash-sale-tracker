@@ -55,6 +55,14 @@ def best_replacement_lot(loss_lot, lots):
     day, then a lot for the same number of shares is chosen, or if none exists,
     for a larger number of shares.
 
+    If a potential replacement lot is sold before the loss lot is sold, that
+    potential replacement lot is not considered. The reason for this is that it
+    can push a loss arbitrarily far in the past, which means that it would be
+    possible that subsequent year's tax returns would need to be amended. This
+    seems wrong, so we don't allow for it. But there doesn't seem to be any IRS
+    ruling on this issue, so it's up in the air whether this would present a
+    problem. But IANACPA/IANAL.
+
     Args:
         loss_lot: A Lot object, which is a loss that should be washed.
         lots: A Lots object, the full set of lots.
@@ -79,8 +87,10 @@ def best_replacement_lot(loss_lot, lots):
             # only be used as a replacement once, per 26 CFR 1.1091-1(e) (the
             # "one bite of the apple" rule).
             continue
-        # TODO don't select lots that were sold before the loss, and provide
-        # justification
+        if lot.sell_date and lot.sell_date < loss_lot.sell_date:
+            # Don't select lots that were sold before the loss. See the
+            # docstring for the reasoning behind this.
+            continue
         possible_replacement_lots.append(lot)
 
     if not possible_replacement_lots:

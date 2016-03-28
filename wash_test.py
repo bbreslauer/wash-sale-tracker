@@ -73,6 +73,8 @@ class TestBestReplacementLot(unittest.TestCase):
         self.days_early_30 = create_lot(10, 2011, 12, 11, 130)
         self.days_after_30 = create_lot(10, 2012, 2, 9, 130)
         self.days_after_31 = create_lot(10, 2012, 2, 10, 130)
+        self.gain_just_before_loss = create_lot(10, 2012, 1, 1, 100,
+                                                    2012, 1, 5, 200)
 
     def assertSameLot(self, a, b):
         self.assertIs(a, b, msg='{} is not {}: \n{}'.format(
@@ -197,6 +199,11 @@ class TestBestReplacementLot(unittest.TestCase):
         lot2.is_replacement = True
         lots = lots_lib.Lots([lot1, lot2])
         self.assertLotIsNone(wash.best_replacement_lot(lot1, lots))
+
+    def test_lot_sold_before_loss_is_not_replacement(self):
+        lots = lots_lib.Lots([self.loss, self.gain_just_before_loss])
+        self.assertLotIsNone(wash.best_replacement_lot(self.loss, lots))
+
 
 class TestWashOneLot(unittest.TestCase):
 
@@ -330,47 +337,18 @@ class TestWashOneLot(unittest.TestCase):
         # Create the split lot.
         split_lot = copy.deepcopy(replacement)
         split_lot.num_shares = 8
-        split_lot.basis *= 8./18.
-        split_lot.proceeds *= 8./18.
+        split_lot.basis = int(round(split_lot.basis * 8. / 18.))
+        split_lot.proceeds = int(round(split_lot.proceeds * 8. / 18.))
         final_lots.add(split_lot)
 
         replacement.num_shares = 10
-        replacement.basis *= 10./18.
-        replacement.proceeds *= 10./18.
+        replacement.basis = int(round(replacement.basis * 10. / 18.))
+        replacement.proceeds = int(round(replacement.proceeds * 10. / 18.))
         replacement.basis += 10
         replacement.buy_date -= self.loss.sell_date - self.loss.buy_date
         replacement.is_replacement = True
 
         wash.wash_one_lot(self.loss, lots)
-        self.assertSameLots(lots, final_lots)
-
-
-class TestWashAllLots(unittest.TestCase):
-
-    def xtest_wash_against_multiple_small_replacements(self):
-        lots = lots_lib.Lots([self.loss, self.small_first_gain,
-                              copy.deepcopy(self.small_first_gain)])
-
-        final_lots = lots_lib.Lots([
-            create_lot(6, 2011, 6, 1, 72, 2012, 1, 10, 66),  # Loss lot
-            create_lot(4, 2011, 6, 1, 48, 2012, 1, 10, 44),  # Split loss lot
-            create_lot(6, 2011, 5, 27, 106, 2012, 6, 1, 200),  # First repl
-            create_lot(4, 2011, 5, 27, 71, 2012, 6, 1, 133),  # Second repl
-            create_lot(2, 2012, 1, 1, 33, 2012, 6, 1, 67),  # Split second
-        ])
-
-        disallowed_loss1 = final_lots.lots()[0]
-        disallowed_loss1.adjustment_code = 'W'
-        disallowed_loss1.adjustment = 6
-        disallowed_loss1.loss_processed = True
-        disallowed_loss2 = final_lots.lots()[1]
-        disallowed_loss2.adjustment_code = 'W'
-        disallowed_loss2.adjustment = 4
-        disallowed_loss2.loss_processed = True
-        final_lots.lots()[2].is_replacement = True
-        final_lots.lots()[3].is_replacement = True
-
-        wash.wash_all_lots(lots)
         self.assertSameLots(lots, final_lots)
 
 

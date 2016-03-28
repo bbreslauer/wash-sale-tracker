@@ -1,0 +1,14 @@
+The first lot is a loss. The second lot is a gain, which is bought and sold between the buy and sell dates of the first lot. We do not use this second lot as replacement shares because it was sold before the first lot was sold.
+
+There doesn't seem to be any example of this situation in any IRS documentation (or elsewhere). But we do this because the alternative is moving losses backwards in time, potentially forever, which doesn't seem right. For instance, it would theoretically be possible to sell a long-term lot and have to refile your taxes for the past 3 years because it caused other losses in those years.
+
+They way that this could happen is:
+
+Dec 20 - buy one share for $100
+Dec 21 - sell it for $101 ($1 gain)
+Jan 15 - buy one share of the same stock for $100
+Jan 16 - sell it for $98 ($2 loss)
+
+So the sale on Jan 16 is a wash sale. This means that the Dec 21 lot's basis is increased to $102, and that lot is now a loss. If you construct a large number of these (one every <30 days), you could push the loss arbitrarily far back.
+
+It seems reasonable not to push the loss back in time this way, so we don't do so.
