@@ -136,7 +136,7 @@ class Lot(object):
                 '${:.2f}'.format(float(self.adjustment) / 100),
                 '{}'.format(self.form_position),
                 '{}'.format(self.buy_lot),
-                '{}'.format(self.replacement_for),
+                '{}'.format(','.join(self.replacement_for)),
                 '{}'.format(self.is_replacement),
                 '{}'.format(self.loss_processed)]
 
