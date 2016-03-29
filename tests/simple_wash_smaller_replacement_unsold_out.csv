@@ -1,4 +1,4 @@
-Cnt,Sym,Desc,BuyDate,Basis,SellDate,Proceeds,AdjCode,Adj,FormPosition,BuyLot,IsReplacement
+Num Shares,Symbol,Description,Buy Date,Adjusted Buy Date,Basis,Adjusted Basis,Sell Date,Proceeds,Adjustment Code,Adjustment,Form Position,Buy Lot,Replacement For,Is Replacement,Loss Processed
 4,ABC,A,05/20/2012,80,06/01/2012,40,W,40,Line 1,_1,
 6,ABC,A,05/20/2012,120,06/01/2012,60,,,Line 1,_1,
 4,ABC,B,05/29/2012,340,,,,,Line 2,_2,True
