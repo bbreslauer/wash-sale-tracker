@@ -219,6 +219,7 @@ def wash_one_lot(loss_lot, lots, logger=logger_lib.NullLogger()):
     loss_lot.adjustment_code = 'W'
     loss_lot.adjustment = loss_lot.adjusted_basis - loss_lot.proceeds
     replacement_lot.is_replacement = True
+    replacement_lot.replacement_for.extend(loss_lot.replacement_for)
     replacement_lot.replacement_for.append(loss_lot.buy_lot)
     replacement_lot.adjusted_basis += loss_lot.adjustment
     replacement_lot.adjusted_buy_date -= (

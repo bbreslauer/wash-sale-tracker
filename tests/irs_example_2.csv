@@ -1,4 +1,4 @@
 Num Shares,Symbol,Description,Buy Date,Adjusted Buy Date,Basis,Adjusted Basis,Sell Date,Proceeds,Adjustment Code,Adjustment,Form Position,Buy Lot,Replacement For,Is Replacement,Loss Processed
-100,M,,09/26/2014,500000,01/09/2015,400000,,,Line 1,,
-50,M,,12/19/2014,275000,,,,,Line 2,,
-25,M,,12/26/2014,112500,,,,,Line 3,,
+100,M,,09/26/2014,,500000,,01/09/2015,400000,,,Line 1,,,,
+50,M,,12/19/2014,,275000,,,,,,Line 2,,,,
+25,M,,12/26/2014,,112500,,,,,,Line 3,,,,

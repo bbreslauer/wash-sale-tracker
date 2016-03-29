@@ -92,7 +92,7 @@ class Lot(object):
             True if this lot was sold for a loss. False if it was sold for a
             gain, or it has not been sold.
         """
-        if self.sell_date and self.proceeds < self.basis:
+        if self.sell_date and self.proceeds < self.adjusted_basis:
             return True
         return False
 

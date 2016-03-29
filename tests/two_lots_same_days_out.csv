@@ -1,4 +1,4 @@
 Num Shares,Symbol,Description,Buy Date,Adjusted Buy Date,Basis,Adjusted Basis,Sell Date,Proceeds,Adjustment Code,Adjustment,Form Position,Buy Lot,Replacement For,Is Replacement,Loss Processed
-2,GOOG,RS 15481,09/25/2014,117598,10/24/2014,107432,W,10166,lot1,_1,
-2,GOOG,RS 15481,09/25/2014,117598,10/24/2014,107432,,0,lot1,_1,
-2,GOOG,RS 15481,08/27/2014,127764,10/24/2014,107432,,0,lot2,_2,True
+2,GOOG,RS 15481,09/25/2014,,117598,,10/24/2014,107432,W,10166,lot1,_1,,,True
+2,GOOG,RS 15481,09/25/2014,,117598,,10/24/2014,107432,,0,lot1,_1,,,True
+2,GOOG,RS 15481,9/25/2014,08/27/2014,117598,127764,10/24/2014,107432,,0,lot2,_2,_1,True,True
