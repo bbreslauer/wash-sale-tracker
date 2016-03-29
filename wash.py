@@ -21,12 +21,15 @@ def _split_lot(num_shares, lot, lots, logger, type_of_lot):
     new_lot = copy.deepcopy(lot)
     new_lot.num_shares -= num_shares
     new_lot.basis = int(round(new_lot.basis * new_lot_portion))
+    new_lot.adjusted_basis = int(round(new_lot.adjusted_basis *
+                                       new_lot_portion))
     new_lot.proceeds = int(round(new_lot.proceeds * new_lot_portion))
     new_lot.adjustment = int(round(new_lot.adjustment * new_lot_portion))
     lots.add(new_lot)
 
     lot.num_shares = num_shares
     lot.basis = int(round(lot.basis * existing_lot_portion))
+    lot.adjusted_basis = int(round(lot.adjusted_basis * existing_lot_portion))
     lot.proceeds = int(round(lot.proceeds * existing_lot_portion))
     lot.adjustment = int(round(lot.adjustment * existing_lot_portion))
 
@@ -71,7 +74,7 @@ def best_replacement_lot(loss_lot, lots):
         have more or fewer shares than the loss_lot.
     """
     # Replacement lots must be chosen oldest first.
-    lots.sort(cmp=lots_lib.Lot.cmp_by_buy_date)
+    lots.sort(cmp=lots_lib.Lot.cmp_by_original_buy_date)
     possible_replacement_lots = []
     for lot in lots:
         if abs(loss_lot.sell_date - lot.buy_date) > datetime.timedelta(days=30):
@@ -214,11 +217,12 @@ def wash_one_lot(loss_lot, lots, logger=logger_lib.NullLogger()):
     # Now the loss_lot and replacement_lot have the same number of shares.
     loss_lot.loss_processed = True
     loss_lot.adjustment_code = 'W'
-    loss_lot.adjustment = loss_lot.basis - loss_lot.proceeds
+    loss_lot.adjustment = loss_lot.adjusted_basis - loss_lot.proceeds
     replacement_lot.is_replacement = True
     replacement_lot.replacement_for.append(loss_lot.buy_lot)
-    replacement_lot.basis += loss_lot.adjustment
-    replacement_lot.buy_date -= loss_lot.sell_date - loss_lot.buy_date
+    replacement_lot.adjusted_basis += loss_lot.adjustment
+    replacement_lot.adjusted_buy_date -= (
+        loss_lot.sell_date - loss_lot.adjusted_buy_date)
 
     logger.print_lots('Adjusted basis and buy date',
                       lots,

@@ -16,11 +16,13 @@ def create_lot(num_shares,
                sell_day=0,
                proceeds=0):
     buy_date = datetime.date(buy_year, buy_month, buy_day)
+    adjusted_buy_date = datetime.date(buy_year, buy_month, buy_day)
     sell_date = None
     if sell_year:
         sell_date = datetime.date(sell_year, sell_month, sell_day)
-    return lots_lib.Lot(num_shares, 'ABC', 'A', buy_date, basis, sell_date,
-                        proceeds, '', 0, '', '', False)
+    return lots_lib.Lot(num_shares, 'ABC', 'A', buy_date, adjusted_buy_date,
+                        basis, basis, sell_date, proceeds, '', 0, '', '', [],
+                        False, False)
 
 
 class TestEarliestLossLot(unittest.TestCase):
@@ -154,8 +156,8 @@ class TestBestReplacementLot(unittest.TestCase):
         self.assertEqual(10, wash_lot.num_shares)
         self.assertEqual(3, lots.size())
 
-        lots.sort(cmp=lots_lib.Lot.cmp_by_buy_date)
-        final_lots.sort(cmp=lots_lib.Lot.cmp_by_buy_date)
+        lots.sort(cmp=lots_lib.Lot.cmp_by_original_buy_date)
+        final_lots.sort(cmp=lots_lib.Lot.cmp_by_original_buy_date)
         self.assertSameLots(lots, final_lots)
 
     def test_replacement_chooses_same_size_replacement_lot(self):
@@ -243,8 +245,10 @@ class TestWashOneLot(unittest.TestCase):
         disallowed_loss.adjustment = 10
         disallowed_loss.loss_processed = True
         replacement = final_lots.lots()[1]
-        replacement.basis = 110
-        replacement.buy_date -= self.loss.sell_date - self.loss.buy_date
+        replacement.adjusted_basis = 110
+        replacement.adjusted_buy_date -= (
+            self.loss.sell_date - self.loss.buy_date)
+        replacement.replacement_for = ['_1']
         replacement.is_replacement = True
 
         wash.wash_one_lot(self.loss, lots)
@@ -259,8 +263,10 @@ class TestWashOneLot(unittest.TestCase):
         disallowed_loss.adjustment = 10
         disallowed_loss.loss_processed = True
         replacement = final_lots.lots()[1]
-        replacement.basis = 110
-        replacement.buy_date -= self.loss.sell_date - self.loss.buy_date
+        replacement.adjusted_basis = 110
+        replacement.adjusted_buy_date -= (
+            self.loss.sell_date - self.loss.buy_date)
+        replacement.replacement_for = ['_1']
         replacement.is_replacement = True
 
         wash.wash_one_lot(self.loss, lots)
@@ -275,8 +281,10 @@ class TestWashOneLot(unittest.TestCase):
         disallowed_loss.adjustment = 10
         disallowed_loss.loss_processed = True
         replacement = final_lots.lots()[1]
-        replacement.basis = 140
-        replacement.buy_date -= self.loss.sell_date - self.loss.buy_date
+        replacement.adjusted_basis = 140
+        replacement.adjusted_buy_date -= (
+            self.loss.sell_date - self.loss.buy_date)
+        replacement.replacement_for = ['_1']
         replacement.is_replacement = True
 
         wash.wash_one_lot(self.loss, lots)
@@ -291,8 +299,10 @@ class TestWashOneLot(unittest.TestCase):
         disallowed_loss.adjustment = 10
         disallowed_loss.loss_processed = True
         replacement = final_lots.lots()[1]
-        replacement.basis = 150
-        replacement.buy_date -= self.loss.sell_date - self.loss.buy_date
+        replacement.adjusted_basis = 150
+        replacement.adjusted_buy_date -= (
+            self.loss.sell_date - self.loss.buy_date)
+        replacement.replacement_for = ['_1']
         replacement.is_replacement = True
 
         wash.wash_one_lot(self.loss, lots)
@@ -307,18 +317,22 @@ class TestWashOneLot(unittest.TestCase):
         split_lot = copy.deepcopy(disallowed_loss)
         split_lot.num_shares = 4
         split_lot.basis *= 4./10.
+        split_lot.adjusted_basis *= 4./10.
         split_lot.proceeds *= 4./10.
         final_lots.add(split_lot)
 
         disallowed_loss.num_shares = 6
         disallowed_loss.basis *= 6./10.
+        disallowed_loss.adjusted_basis *= 6./10.
         disallowed_loss.proceeds *= 6./10.
         disallowed_loss.adjustment_code = 'W'
         disallowed_loss.adjustment = 6
         disallowed_loss.loss_processed = True
         replacement = final_lots.lots()[1]
-        replacement.basis = 106
-        replacement.buy_date -= self.loss.sell_date - self.loss.buy_date
+        replacement.adjusted_basis = 106
+        replacement.adjusted_buy_date -= (
+            self.loss.sell_date - self.loss.buy_date)
+        replacement.replacement_for = ['_1']
         replacement.is_replacement = True
 
         wash.wash_one_lot(self.loss, lots)
@@ -338,14 +352,20 @@ class TestWashOneLot(unittest.TestCase):
         split_lot = copy.deepcopy(replacement)
         split_lot.num_shares = 8
         split_lot.basis = int(round(split_lot.basis * 8. / 18.))
+        split_lot.adjusted_basis = int(round(split_lot.adjusted_basis * 8. /
+                                             18.))
         split_lot.proceeds = int(round(split_lot.proceeds * 8. / 18.))
         final_lots.add(split_lot)
 
         replacement.num_shares = 10
         replacement.basis = int(round(replacement.basis * 10. / 18.))
+        replacement.adjusted_basis = int(round(replacement.adjusted_basis * 10.
+                                               / 18.))
         replacement.proceeds = int(round(replacement.proceeds * 10. / 18.))
-        replacement.basis += 10
-        replacement.buy_date -= self.loss.sell_date - self.loss.buy_date
+        replacement.adjusted_basis += 10
+        replacement.adjusted_buy_date -= (
+            self.loss.sell_date - self.loss.buy_date)
+        replacement.replacement_for = ['_1']
         replacement.is_replacement = True
 
         wash.wash_one_lot(self.loss, lots)
