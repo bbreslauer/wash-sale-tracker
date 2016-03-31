@@ -10,8 +10,8 @@ This script is inspired by [adlr/wash-sale-calculator](https://github.com/adlr/w
 
 The script runs best in interactive mode if these two dependencies are installed:
 
-[terminaltables](https://github.com/Robpol86/terminaltables)
-[colorclass](https://github.com/Robpol86/colorclass)
+* [terminaltables](https://github.com/Robpol86/terminaltables)
+* [colorclass](https://github.com/Robpol86/colorclass)
 
 # Running
 
