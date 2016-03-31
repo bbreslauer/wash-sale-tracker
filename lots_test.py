@@ -125,7 +125,7 @@ class TestLots(unittest.TestCase):
         lots.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 1),
             datetime.date(2014, 9, 1), 0, 0, datetime.date(2014, 10, 5), 0, '',
             0, 'form1', '', [], False, False))
-        lots.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2),
+        lots.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 7),
             datetime.date(2014, 9, 2), 0, 0, datetime.date(2014, 11, 5), 0, '',
             0, 'form1', '', [], False, False))
         lots.append(lots_lib.Lot(2, '', '', datetime.date(2014, 9, 2),
@@ -151,7 +151,7 @@ class TestLots(unittest.TestCase):
         expected.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2),
             datetime.date(2014, 9, 2), 0, 0, datetime.date(2014, 10, 5), 0, '',
             0, 'form1', '', [], False, False))
-        expected.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2),
+        expected.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 7),
             datetime.date(2014, 9, 2), 0, 0, datetime.date(2014, 11, 5), 0, '',
             0, 'form1', '', [], False, False))
         expected.append(lots_lib.Lot(2, '', '', datetime.date(2014, 9, 2),
@@ -174,8 +174,60 @@ class TestLots(unittest.TestCase):
         self.assertTrue(lots == expected)
 
     def test_compare_by_original_buy_date(self):
-        # TODO: Implement this.
-        pass
+        lots = []
+        lots.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2),
+            datetime.date(2014, 9, 2), 0, 0, datetime.date(2014, 11, 5), 0, '',
+            0, 'form2', '', [], False, False))
+        lots.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 1),
+            datetime.date(2014, 9, 1), 0, 0, datetime.date(2014, 10, 5), 0, '',
+            0, 'form1', '', [], False, False))
+        lots.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2),
+            datetime.date(2014, 9, 7), 0, 0, datetime.date(2014, 11, 5), 0, '',
+            0, 'form1', '', [], False, False))
+        lots.append(lots_lib.Lot(2, '', '', datetime.date(2014, 9, 2),
+            datetime.date(2014, 9, 2), 0, 0, datetime.date(2014, 11, 5), 0, '',
+            0, 'form1', '', [], False, False))
+        lots.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 3),
+            datetime.date(2014, 9, 3), 0, 0, datetime.date(2014, 10, 5), 0, '',
+            0, 'form1', '', [], False, False))
+        lots.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2),
+            datetime.date(2014, 9, 2), 0, 0, None, 0, '', 0, 'form1', '', [],
+            False, False))
+        lots.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2),
+            datetime.date(2014, 9, 2), 0, 0, datetime.date(2014, 10, 5), 0, '',
+            0, 'form1', '', [], False, False))
+        lots.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 3),
+            datetime.date(2014, 9, 3), 0, 0, datetime.date(2014, 10, 6), 0, '',
+            0, 'form1', '', [], False, False))
+
+        expected = []
+        expected.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 1),
+            datetime.date(2014, 9, 1), 0, 0, datetime.date(2014, 10, 5), 0, '',
+            0, 'form1', '', [], False, False))
+        expected.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2),
+            datetime.date(2014, 9, 2), 0, 0, datetime.date(2014, 10, 5), 0, '',
+            0, 'form1', '', [], False, False))
+        expected.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2),
+            datetime.date(2014, 9, 7), 0, 0, datetime.date(2014, 11, 5), 0, '',
+            0, 'form1', '', [], False, False))
+        expected.append(lots_lib.Lot(2, '', '', datetime.date(2014, 9, 2),
+            datetime.date(2014, 9, 2), 0, 0, datetime.date(2014, 11, 5), 0, '',
+            0, 'form1', '', [], False, False))
+        expected.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2),
+            datetime.date(2014, 9, 2), 0, 0, datetime.date(2014, 11, 5), 0, '',
+            0, 'form2', '', [], False, False))
+        expected.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 2),
+            datetime.date(2014, 9, 2), 0, 0, None, 0, '', 0, 'form1', '', [],
+            False, False))
+        expected.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 3),
+            datetime.date(2014, 9, 3), 0, 0, datetime.date(2014, 10, 5), 0, '',
+            0, 'form1', '', [], False, False))
+        expected.append(lots_lib.Lot(1, '', '', datetime.date(2014, 9, 3),
+            datetime.date(2014, 9, 3), 0, 0, datetime.date(2014, 10, 6), 0, '',
+            0, 'form1', '', [], False, False))
+
+        lots.sort(cmp=lots_lib.Lot.cmp_by_original_buy_date)
+        self.assertTrue(lots == expected)
 
     def test_compare_by_sell_date(self):
         lots = []
