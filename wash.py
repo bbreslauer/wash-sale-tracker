@@ -202,9 +202,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--out_file')
     parser.add_argument('-w', '--do_wash', metavar='in_file')
+    parser.add_argument('-q', '--quiet', action="store_true")
     parsed = parser.parse_args()
 
-    logger = logger_lib.TermLogger()
+    if parsed.quiet:
+        logger = logger_lib.NullLogger()
+    else:
+        logger = logger_lib.TermLogger()
     if parsed.do_wash:
         lots = lots_lib.Lots([])
         with open(parsed.do_wash) as f:
