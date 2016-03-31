@@ -146,7 +146,7 @@ class TestBestReplacementLot(unittest.TestCase):
         lots = lots_lib.Lots([self.loss, self.small_first_gain,
                               self.large_first_gain])
         wash_lot = wash.best_replacement_lot(self.loss, lots)
-        self.assertSameLot(self.large_first_gain, wash_lot)
+        self.assertSameLot(self.small_first_gain, wash_lot)
 
     def test_replacement_for_large_loss(self):
         lots = lots_lib.Lots([self.unsold, self.first_gain, self.large_loss])
@@ -159,18 +159,6 @@ class TestBestReplacementLot(unittest.TestCase):
         lots.sort(cmp=lots_lib.Lot.cmp_by_original_buy_date)
         final_lots.sort(cmp=lots_lib.Lot.cmp_by_original_buy_date)
         self.assertSameLots(lots, final_lots)
-
-    def test_replacement_chooses_same_size_replacement_lot(self):
-        lots = lots_lib.Lots([self.loss, self.first_gain,
-                              self.small_first_gain, self.large_first_gain])
-        self.assertSameLot(self.first_gain,
-                            wash.best_replacement_lot(self.loss, lots))
-
-        self.assertSameLot(self.small_first_gain,
-                            wash.best_replacement_lot(self.small_loss, lots))
-
-        self.assertSameLot(self.large_first_gain,
-                            wash.best_replacement_lot(self.large_loss, lots))
 
     def test_loss_not_in_lots(self):
         lots = lots_lib.Lots([self.unsold, self.first_gain])

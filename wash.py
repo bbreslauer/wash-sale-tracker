@@ -55,8 +55,8 @@ def best_replacement_lot(loss_lot, lots):
     returned. It may be for fewer, the same, or more shares than the loss lot.
     If there are multiple lots bought on the first such day, then the one sold
     earliest is chosen. If there are multiple lots bought and sold on the same
-    day, then a lot for the same number of shares is chosen, or if none exists,
-    for a larger number of shares.
+    day, then the first lot by form position is chosen. For this reason, it is
+    best to set a unique form position for each input line.
 
     If a potential replacement lot is sold before the loss lot is sold, that
     potential replacement lot is not considered. The reason for this is that it
@@ -105,53 +105,7 @@ def best_replacement_lot(loss_lot, lots):
 
     if not possible_replacement_lots:
         return None
-
-    # At this point, we have found all the lots that could be replacements,
-    # sorted by buy date. We need to choose the one that was purchased first,
-    # but in the case of multiple lots being purchased on the same (first) day
-    # and also sold on the same day (though the purchase and sale dates may be
-    # different), why not choose one that matches (or is greater than) the
-    # number of loss shares, so that we don't create more splits than necessary.
-    #
-    # For instance, if we have a loss of 10 shares, and 2 purchases on the same
-    # day, one for 5 shares and one for 12 shares, we might as well pair with
-    # the 12 shares. This means that we'll split the 12 shares into two lots, a
-    # 10-share one and a 2-share one. If we had instead chosen the 5 share lot,
-    # then we'd split the loss lot into two 5-share lots, and then need to pair
-    # the second 5-share loss lot with the 12-share lot, which would involve
-    # another split.
-    #
-    # Note that the requirement here that the lots are sold on the same day is
-    # not backed up by anything in Pub550, as far as I know. It just seems
-    # reasonable that the first sold stock is more reasonably replacement
-    # stock.
-
-    first_day_lots = []
-    first_buy_date = possible_replacement_lots[0].buy_date
-    first_sell_date = possible_replacement_lots[0].sell_date
-    for lot in possible_replacement_lots:
-        if lot.buy_date == first_buy_date and lot.sell_date == first_sell_date:
-            first_day_lots.append(lot)
-
-    if len(first_day_lots) == 1:
-        lot = first_day_lots[0]
-        return lot
-
-    # If we have gotten here, then we know that there are at least 2 lots to
-    # choose from. Choose the one with the same number of shares as the loss,
-    # or if none exists then a lot with a greater number of shares than the
-    # loss.
-    first_day_lots.sort(lots_lib.Lot.cmp_by_num_shares)
-    for lot in first_day_lots:
-        if lot.num_shares < loss_lot.num_shares:
-            continue
-        if lot.num_shares >= loss_lot.num_shares:
-            return lot
-
-    # If we have gotten here, then there is no replacement lot that has at
-    # least as many shares as the loss. Return the lot with the largest number
-    # of replacement shares (the rest of the loss will be washed later).
-    return first_day_lots[-1]
+    return possible_replacement_lots[0]
 
 def earliest_loss_lot(lots):
     """Finds the first loss sale that has not already been processed.

@@ -17,6 +17,12 @@ except ImportError:
     pass
 
 
+# This is a global value for the number of lots that have been created. It is
+# global because we want to increment it whenever a Lot object is created,
+# which is done in a number of different places.
+_LOT_COUNT = 0
+
+
 class BadHeadersError(Exception):
     """Raised if the headers that are parsed are not in the correct format."""
 
@@ -84,6 +90,11 @@ class Lot(object):
         self.replacement_for = replacement_for
         self.is_replacement = is_replacement
         self.loss_processed = loss_processed
+
+        # The lot number is only used to sort otherwise equivalent lots.
+        global _LOT_COUNT
+        self._lot_number = _LOT_COUNT
+        _LOT_COUNT += 1
 
     def is_loss(self):
         """Determines whether this lot is a loss.
@@ -155,7 +166,7 @@ class Lot(object):
             if a.form_position < b.form_position:
                 return -1
             return 1
-        return 0
+        return a._lot_number < b._lot_number
 
     @staticmethod
     def cmp_by_original_buy_date(a, b):
@@ -172,7 +183,7 @@ class Lot(object):
             if a.form_position < b.form_position:
                 return -1
             return 1
-        return 0
+        return a._lot_number < b._lot_number
 
     @staticmethod
     def cmp_by_sell_date(a, b):
@@ -189,12 +200,7 @@ class Lot(object):
             if a.form_position < b.form_position:
                 return -1
             return 1
-        return 0
-
-    @staticmethod
-    def cmp_by_num_shares(a, b):
-        """Sorts two lots based solely on their number of shares."""
-        return a.num_shares - b.num_shares
+        return a._lot_number < b._lot_number
 
 
 class Lots(object):
