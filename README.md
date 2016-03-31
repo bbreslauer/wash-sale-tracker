@@ -6,6 +6,15 @@ Note that the author is not a CPA or tax expert. This program most certainly con
 
 This script is inspired by [adlr/wash-sale-calculator](https://github.com/adlr/wash-sale-calculator), but rewritten so that the author could reason about how the replacement lots were being chosen. It also includes keeps track of some additional fields, like the original basis and buy date, to make it easy to correlate the output with a 1099-B.
 
+## Dependencies
+
+The script runs best in interactive mode if these two dependencies are installed:
+
+[terminaltables](https://github.com/Robpol86/terminaltables)
+[colorclass](https://github.com/Robpol86/colorclass)
+
+# Running
+
 To use the program from a terminal, run:
 
 `python2 wash.py -w dummy_example.csv -o out.csv`
@@ -31,9 +40,13 @@ The csv file must have one buy or buy-sell trade per row. Each row must have all
 | Is Replacement | Boolean (the strings true/false) | Optional. True if the lot was used as a replacement lot. |
 | Loss Processed | Boolean (the strings true/false) | Optional. True if the lot is a loss and has been processed. |
 
-Note: It could be possible for a wash sale to cause losses to travel backwards in time, potentially for multiple years, if a replacement lot is sold before the loss is sold. This software does not account for this, and allows the loss to travel backwards in time.
+## Notes
 
-Note: If multiple lots are bought on the same day and sold on the same day (though the buy and sell dates may be different), this software will not use a lot as a replacement lot if the loss replaced that same lot. Specifically, say there are 2 lots of size 10 and 6 shares, named A and B. The 10 A shares would be split into 6 and 4 shares, and the 6 A shares would be replaced with the 6 B shares. The 6 B shares will not then be split into 4 shares and 2 shares with the 4 B shares replaced with the 4 A shares.
+It could be possible for a wash sale to cause losses to travel backwards in time, potentially for multiple years, if a replacement lot is sold before the loss is sold. This software does not account for this, and allows the loss to travel backwards in time.
+
+If multiple lots are bought on the same day and sold on the same day (though the buy and sell dates may be different), this software will not use a lot as a replacement lot if the loss replaced that same lot. Specifically, say there are 2 lots of size 10 and 6 shares, named A and B. The 10 A shares would be split into 6 and 4 shares, and the 6 A shares would be replaced with the 6 B shares. The 6 B shares will not then be split into 4 shares and 2 shares with the 4 B shares replaced with the 4 A shares.
+
+## Contributing
 
 If you commit changes to this software, make sure all tests are passing. To verify that all the tests pass:
 
