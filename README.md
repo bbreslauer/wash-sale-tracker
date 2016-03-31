@@ -1,6 +1,6 @@
 # wash-sale-tracker
 
-Script that calculates wash sale adjustments for US taxes.
+Software that calculates wash sale adjustments for US taxes.
 
 Note that the author is not a CPA or tax expert. This program most certainly contains bugs.
 
@@ -31,6 +31,9 @@ The csv file must have one buy or buy-sell trade per row. Each row must have all
 | Is Replacement | Boolean (the strings true/false) | Optional. True if the lot was used as a replacement lot. |
 | Loss Processed | Boolean (the strings true/false) | Optional. True if the lot is a loss and has been processed. |
 
+Note: It could be possible for a wash sale to cause losses to travel backwards in time, potentially for multiple years, if a replacement lot is sold before the loss is sold. This software does not account for this, and allows the loss to travel backwards in time.
+
+Note: If multiple lots are bought on the same day and sold on the same day (though the buy and sell dates may be different), this software will not use a lot as a replacement lot if the loss replaced that same lot. Specifically, say there are 2 lots of size 10 and 6 shares, named A and B. The 10 A shares would be split into 6 and 4 shares, and the 6 A shares would be replaced with the 6 B shares. The 6 B shares will not then be split into 4 shares and 2 shares with the 4 B shares replaced with the 4 A shares.
 
 If you commit changes to this software, make sure all tests are passing. To verify that all the tests pass:
 
