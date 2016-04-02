@@ -4,7 +4,8 @@ import datetime
 import lots as lots_lib
 import logger as logger_lib
 
-def _split_lot(num_shares, lot, lots, logger, type_of_lot):
+def _split_lot(num_shares, lot, lots, logger, type_of_lot,
+               existing_loss_lot=None, existing_replacement_lot=None):
     """Splits lot and adds the new lot to lots.
 
     Args:
@@ -14,6 +15,10 @@ def _split_lot(num_shares, lot, lots, logger, type_of_lot):
         lots: A Lots object to add the new lot to.
         logger: A logger_lib.Logger.
         type_of_lot: Either 'loss' or 'replacement'
+        existing_loss_lot: A Lot or None, used to indicate the Lot that is a
+            loss if replacement shares are being split
+        existing_replacement_lot: A Lot or None, used to indicate the Lot that
+            is a replacement if loss shares are being split
     """
     existing_lot_portion = float(num_shares) / float(lot.num_shares)
     new_lot_portion = float(lot.num_shares - num_shares) / float(lot.num_shares)
@@ -33,11 +38,13 @@ def _split_lot(num_shares, lot, lots, logger, type_of_lot):
     lot.proceeds = int(round(lot.proceeds * existing_lot_portion))
     lot.adjustment = int(round(lot.adjustment * existing_lot_portion))
 
-    loss_lots = [lot] if type_of_lot == 'loss' else []
+    loss_lots = [lot] if type_of_lot == 'loss' else [existing_loss_lot]
     split_off_loss_lots = [new_lot] if type_of_lot == 'loss' else []
-    replacement_lots = [lot] if type_of_lot == 'replacement' else []
-    split_off_replacement_lots = [new_lot
-                                  ] if type_of_lot == 'replacement' else []
+    replacement_lots = (
+            [lot] if type_of_lot == 'replacement' else
+            [existing_replacement_lot])
+    split_off_replacement_lots = (
+            [new_lot] if type_of_lot == 'replacement' else [])
     logger.print_lots('Split {} in two'.format(type_of_lot),
                       lots,
                       loss_lots=loss_lots,
@@ -163,10 +170,11 @@ def wash_one_lot(loss_lot, lots, logger=logger_lib.NullLogger()):
     # There is a replacement lot. If it is not for the same number of shares as
     # the loss lot, split the larger one.
     if loss_lot.num_shares > replacement_lot.num_shares:
-        _split_lot(replacement_lot.num_shares, loss_lot, lots, logger, 'loss')
+        _split_lot(replacement_lot.num_shares, loss_lot, lots, logger, 'loss',
+                   existing_replacement_lot=replacement_lot)
     elif replacement_lot.num_shares > loss_lot.num_shares:
         _split_lot(loss_lot.num_shares, replacement_lot, lots, logger,
-                   'replacement')
+                   'replacement', existing_loss_lot=loss_lot)
 
     # Now the loss_lot and replacement_lot have the same number of shares.
     loss_lot.loss_processed = True
