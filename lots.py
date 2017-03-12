@@ -474,7 +474,7 @@ class Lots(object):
 
         def convert_to_string_list(value):
             if value:
-                return value.split('|')
+                return value.split(';')
             return []
 
         reader = csv.DictReader(data, fieldnames=Lot.FIELD_NAMES)
@@ -526,7 +526,7 @@ class Lots(object):
 
         def convert_from_string_list(value):
             if value:
-                return '|'.join(value)
+                return ';'.join(value)
             return ''
 
         writer = csv.DictWriter(output_file, fieldnames=Lot.FIELD_NAMES)
