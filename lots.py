@@ -531,7 +531,9 @@ class Lots(object):
 
         writer = csv.DictWriter(output_file, fieldnames=Lot.FIELD_NAMES)
         writer.writerow(self.HEADERS)
-        for lot in self._lots:
+        lots = copy.copy(self._lots)
+        lots.sort(cmp=Lot.cmp_by_original_buy_date)
+        for lot in lots:
             row = {}
             row['num_shares'] = convert_from_int(lot.num_shares)
             row['symbol'] = lot.symbol
