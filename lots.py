@@ -7,14 +7,14 @@ try:
     import terminaltables
     _HAS_TERMINALTABLES = True
 except ImportError:
-    pass
+    print 'Install terminaltables library for formatting tables.'
 
 _HAS_COLORCLASS = False
 try:
     import colorclass
     _HAS_COLORCLASS = True
 except ImportError:
-    pass
+    print 'Install colorclass library for color coding changes.'
 
 
 # This is a global value for the number of lots that have been created. It is
