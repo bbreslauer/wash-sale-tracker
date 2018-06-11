@@ -108,6 +108,11 @@ def best_replacement_lot(loss_lot, lots):
             # Don't select lots that were sold before the loss. See the
             # docstring for the reasoning behind this.
             continue
+        if lot.loss_processed:
+            # Don't select lots that were already processed as a loss, since
+            # that would cause the basis to increase, leading to a loop where
+            # it would make another lot be adjusted more.
+            continue
         possible_replacement_lots.append(lot)
 
     if not possible_replacement_lots:

@@ -1,0 +1,5 @@
+This is similar to two_lots_same_days, but the order of the lines is switched.
+It should have the same result.
+
+When two lots are bought on the same day and sold on the same day, one lot
+should be used as a replacement for the other lot.
