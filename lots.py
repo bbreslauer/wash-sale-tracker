@@ -514,6 +514,11 @@ class Lots(object):
                 return str(value)
             return ''
 
+        def convert_cents_to_dollars(value):
+            if value:
+                return '%0.2f' % (float(value)/100)
+            return ''
+
         def convert_from_date(value):
             if value:
                 return value.strftime('%m/%d/%Y')
@@ -542,15 +547,16 @@ class Lots(object):
             else:
                 row['adjusted_buy_date'] = convert_from_date(
                     lot.adjusted_buy_date)
-            row['basis'] = convert_from_int(lot.basis)
+            row['basis'] = convert_cents_to_dollars(lot.basis)
             if lot.basis == lot.adjusted_basis:
                 row['adjusted_basis'] = ''
             else:
-                row['adjusted_basis'] = convert_from_int(lot.adjusted_basis)
+                row['adjusted_basis'] = convert_cents_to_dollars(
+                    lot.adjusted_basis)
             row['sell_date'] = convert_from_date(lot.sell_date)
-            row['proceeds'] = convert_from_int(lot.proceeds)
+            row['proceeds'] = convert_cents_to_dollars(lot.proceeds)
             row['adjustment_code'] = lot.adjustment_code
-            row['adjustment'] = convert_from_int(lot.adjustment)
+            row['adjustment'] = convert_cents_to_dollars(lot.adjustment)
             row['form_position'] = lot.form_position
             row['buy_lot'] = lot.buy_lot
             row['replacement_for'] = convert_from_string_list(
