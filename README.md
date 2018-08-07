@@ -36,7 +36,7 @@ The csv file must have one buy or buy-sell trade per row. Each row must have all
 | Adjustment | Integer | Optional. The number of cents of this lot's disallowed loss. |
 | Form Position | String | Optional. This field is used as a tertiary sorting value, but is primarily used to associate lots before and after the script is run. |
 | Buy Lot | String | Optional. Generally can be left blank. If two lots were acquired as part of the same buy order, put the same value here. This may occur if you bought a lot of stock, then sold off the lot in pieces (each piece would get a new line on the 1099b); if the broker automatically divided your buy order into pieces to execute; or if other factors caused the broker to split one buy lot into multiple lines on the 1099b. (This field is used because shares from a given buy lot can't replace shares from the same buy lot in a wash sale). |
-| Replacement For | String | Optional. A list of strings, separated by a \| character, of buy lots that this lot is a replacement for. Populated by the script. |
+| Replacement For | String | Optional. A list of strings, separated by a ; character, of buy lots that this lot is a replacement for. Populated by the script. |
 | Is Replacement | Boolean (the strings true/false) | Optional. True if the lot was used as a replacement lot. |
 | Loss Processed | Boolean (the strings true/false) | Optional. True if the lot is a loss and has been processed. |
 
