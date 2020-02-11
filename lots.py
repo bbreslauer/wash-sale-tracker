@@ -412,7 +412,7 @@ class Lots(object):
             if classification:
                 str_data.append(classification[0])
                 color = classification[1]
-                str_data = map(lambda x: Lots._color_string(color, x), str_data)
+                str_data = list(map(lambda x: Lots._color_string(color, x), str_data))
             else:
                 str_data.append('')
             lots_data.append(str_data)
