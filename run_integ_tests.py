@@ -2,6 +2,7 @@ import lots as lots_lib
 import wash as wash_lib
 
 import os
+from functools import cmp_to_key
 
 
 def run_test(infile, outfile):
@@ -14,17 +15,17 @@ def run_test(infile, outfile):
     lots = lots_lib.Lots.create_from_csv_data(open(infile))
     wash_lib.wash_all_lots(lots)
     expected = lots_lib.Lots.create_from_csv_data(open(outfile))
-    lots.sort(cmp=lots_lib.Lot.cmp_by_buy_date)
-    expected.sort(cmp=lots_lib.Lot.cmp_by_buy_date)
+    lots.sort(key=cmp_to_key(lots_lib.Lot.cmp_by_buy_date))
+    expected.sort(key=cmp_to_key(lots_lib.Lot.cmp_by_buy_date))
     if not lots.contents_equal(expected):
-        print 'Test failed: {}'.format(infile)
-        print 'Got result:'
+        print('Test failed: {}'.format(infile))
+        print('Got result:')
         lots.do_print()
-        print 'Expected:'
+        print('Expected:')
         expected.do_print()
-        print '\n\n'
+        print('\n\n')
     else:
-        print "Test passed: {}".format(infile)
+        print("Test passed: {}".format(infile))
 
 
 def main():

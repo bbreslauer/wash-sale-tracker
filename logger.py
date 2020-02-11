@@ -33,7 +33,7 @@ class TermLogger(Logger):
                    split_off_loss_lots=None,
                    replacement_lots=None,
                    split_off_replacement_lots=None):
-        print ''
+        print('')
         lots.do_print(loss_lots, split_off_loss_lots, replacement_lots,
                       split_off_replacement_lots)
         raw_input(message + '. Hit enter to continue>')
