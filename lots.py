@@ -1,20 +1,21 @@
 import copy
 import csv
 import datetime
+from functools import cmp_to_key
 
 _HAS_TERMINALTABLES = False
 try:
     import terminaltables
     _HAS_TERMINALTABLES = True
 except ImportError:
-    print 'Install terminaltables library for formatting tables.'
+    print('Install terminaltables library for formatting tables.')
 
 _HAS_COLORCLASS = False
 try:
     import colorclass
     _HAS_COLORCLASS = True
 except ImportError:
-    print 'Install colorclass library for color coding changes.'
+    print('Install colorclass library for color coding changes.')
 
 
 # This is a global value for the number of lots that have been created. It is
@@ -319,13 +320,13 @@ class Lots(object):
                  split_off_replacement_lots=None):
         global _HAS_TERMINALTABLES
         if _HAS_TERMINALTABLES:
-            print self._terminaltables_str(loss_lots, split_off_loss_lots,
+            print(self._terminaltables_str(loss_lots, split_off_loss_lots,
                                            replacement_lots,
-                                           split_off_replacement_lots)
+                                           split_off_replacement_lots))
         else:
-            print self._simple_str(loss_lots, split_off_loss_lots,
+            print(self._simple_str(loss_lots, split_off_loss_lots,
                                    replacement_lots,
-                                   split_off_replacement_lots)
+                                   split_off_replacement_lots))
 
     @staticmethod
     def _classify_lot(lot,
@@ -400,7 +401,7 @@ class Lots(object):
         """
         # Make a shallow copy so that we can sort but id(lot) still works.
         lots = copy.copy(self._lots)
-        lots.sort(cmp=Lot.cmp_by_original_buy_date)
+        lots.sort(key=cmp_to_key(Lot.cmp_by_original_buy_date))
         lots_data = [[self.SHORT_HEADERS[field] for field in Lot.FIELD_NAMES]]
         lots_data[0].append('Matched')
         for lot in lots:
@@ -411,7 +412,7 @@ class Lots(object):
             if classification:
                 str_data.append(classification[0])
                 color = classification[1]
-                str_data = map(lambda x: Lots._color_string(color, x), str_data)
+                str_data = list(map(lambda x: Lots._color_string(color, x), str_data))
             else:
                 str_data.append('')
             lots_data.append(str_data)
@@ -424,7 +425,7 @@ class Lots(object):
                     split_off_replacement_lots=None):
         # Make a shallow copy so that we can sort but id(lot) still works.
         lots = copy.copy(self._lots)
-        lots.sort(cmp=Lot.cmp_by_original_buy_date)
+        lots.sort(key=cmp_to_key(Lot.cmp_by_original_buy_date))
         lot_strings = []
         lot_strings.append(' '.join([self.SHORT_HEADERS[field]
                                      for field in Lot.FIELD_NAMES]))
@@ -478,7 +479,7 @@ class Lots(object):
             return []
 
         reader = csv.DictReader(data, fieldnames=Lot.FIELD_NAMES)
-        header_row = reader.next()
+        header_row = next(reader)
         if header_row != Lots.HEADERS:
             raise BadHeadersError(str(header_row) + str(Lots.HEADERS))
         lots = []
